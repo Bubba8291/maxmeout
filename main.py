@@ -43,7 +43,7 @@ def webhookRequest(store_name, model):
 
     data = {
         "content" : "", # Put your Discord id in the format of <@[discord ID]> to get mentioned when there's stock
-        "username" : "" # Put your Discord webhook name here
+        "username" : "AirPods Max Stock" # Put your Discord webhook name here
     }
 
     data["embeds"] = [
