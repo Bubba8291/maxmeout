@@ -1,5 +1,4 @@
 import argparse
-import beepy
 import datetime
 import re
 import requests
@@ -9,7 +8,7 @@ import time
 parser = argparse.ArgumentParser()
 parser.add_argument('--store_url', type=str, help='The Apple website page url of the primary store to watch. The 11 nearest stores to the primary store will also be watched.')
 parser.add_argument('--models', type=str, help="A comma separated list of the models to watch. Valid values are space_gray, silver, green, sky_blue, pink.")
-parser.add_argument('--sleep_time', type=float, default=5, help='The number of seconds to wait in between each check. Default: 5 seconds.')
+parser.add_argument('--sleep_time', type=float, default=300, help='The number of seconds to wait in between each check. Default: 5 minutes.')
 
 args = parser.parse_args()
 
@@ -39,6 +38,23 @@ def log(msg):
 def check_store(store, product):
     return store['partsAvailability'][product]['pickupDisplay'] != 'unavailable'
 
+def webhookRequest(store_name, model):
+    url = "" # Put your Discord webhook url here
+
+    data = {
+        "content" : "", # Put your Discord id in the format of <@[discord ID]> to get mentioned when there's stock
+        "username" : "" # Put your Discord webhook name here
+    }
+
+    data["embeds"] = [
+        {
+            "description" : "AirPods Max are in stock for the " + model + " model!",
+            "title" : "Stock Available at " + store_name
+        }
+    ]
+
+    result = requests.post(url, json = data)
+
 def check_model_near(model, store_id):
     try:
         r = requests.get(
@@ -50,7 +66,7 @@ def check_model_near(model, store_id):
                 store_name = store['storeName']
                 if check_store(store, model):
                     log(f'Found {model_id_to_name[model]} availability at {store_name}!')
-                    beepy.beep(1)
+                    webhookRequest(store_name, model_id_to_name[model])
                     found = True
             if not found:
                 log(f'No availability found for {model_id_to_name[model]}.')
